@@ -34,6 +34,7 @@ public class Customer {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+
     public Customer(Long id, String firstName, String lastName, String email, String phoneNumber, String company, String address, CustomerStatus status, BigDecimal totalPurchaseValue, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.firstName = firstName;
@@ -140,6 +141,7 @@ public class Customer {
         this.updatedAt = updatedAt;
     }
 
+
     @Override
     public String toString() {
         return "Customer{" +
@@ -157,5 +159,3 @@ public class Customer {
                 '}';
     }
 }
-
-

@@ -162,6 +162,7 @@ public class CustomerService {
                 Customer customer = customerOpt.get();
                 logger.debug("Found customer to delete: {} (email: {})", id, customer.getEmail());
 
+
                 this.customerRepository.deleteById(id);
                 logger.info("Successfully deleted customer with ID: {} (email: {})",
                         id, customer.getEmail());

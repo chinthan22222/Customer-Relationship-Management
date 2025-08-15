@@ -15,3 +15,4 @@ public interface SaleRepository extends JpaRepository<Sale,Long> {
 
     List<Sale> findSaleByStatus(SaleStatus status);
 }
+

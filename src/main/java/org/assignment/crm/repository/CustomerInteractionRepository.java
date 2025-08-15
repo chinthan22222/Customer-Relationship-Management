@@ -15,3 +15,4 @@ public interface CustomerInteractionRepository extends JpaRepository<CustomerInt
 
     List<CustomerInteraction> findCustomerInteractionByPerformedBy_Id(long performedById);
 }
+

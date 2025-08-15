@@ -29,6 +29,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserStatus status;
 
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
     @Override
     public String toString() {
         return "User{" +
@@ -65,9 +68,6 @@ public class User {
     public void setStatus(UserStatus status) {
         this.status = status;
     }
-
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 
     public User(long id, String userName, String email, String password, String firstname, String lastName, UserRole role, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
