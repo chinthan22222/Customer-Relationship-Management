@@ -3,6 +3,7 @@ package org.assignment.crm.entity;
 import jakarta.persistence.*;
 import org.assignment.crm.enums.SaleStatus;
 import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 
 import java.math.BigDecimal;
@@ -27,13 +28,13 @@ public class Sale {
     private String description;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @OnDelete(action = org.hibernate.annotations.OnDeleteAction.SET_NULL)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "customer_id", nullable = true)
     private Customer customer;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "sales_rep_id", nullable = true)
-    @OnDelete(action = org.hibernate.annotations.OnDeleteAction.SET_NULL)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private User salesRep;
 
     private LocalDateTime createdAt;

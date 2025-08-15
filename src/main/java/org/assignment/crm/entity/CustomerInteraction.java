@@ -5,6 +5,7 @@ import org.assignment.crm.enums.InteractionType;
 
 import java.time.LocalDateTime;
 import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "customer_interactions")
@@ -23,13 +24,13 @@ public class CustomerInteraction {
     private String notes;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @OnDelete(action = org.hibernate.annotations.OnDeleteAction.SET_NULL)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "customer_id", nullable = true)
     private Customer customer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = true)
-    @OnDelete(action = org.hibernate.annotations.OnDeleteAction.SET_NULL)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private User performedBy;
 
     private LocalDateTime createdTime;
