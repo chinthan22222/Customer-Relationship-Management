@@ -53,14 +53,13 @@ public class DataInitializer implements CommandLineRunner {
 
         logger.info("Initializing users…");
 
-        User admin   = createUser("admin_test",   "admin.test@demo.com",   "Test", "Admin",   UserRole.ADMIN,   UserStatus.ACTIVE);
-        User manager = createUser("manager_test", "manager.test@demo.com", "Test", "Manager", UserRole.MANAGER, UserStatus.ACTIVE);
+        User admin   = createUser("admin_test",   "admin.test@company.com",   "System", "Admin",   UserRole.ADMIN,   UserStatus.ACTIVE);
+        User manager = createUser("manager_test", "manager.test@company.com", "Team", "Manager", UserRole.MANAGER, UserStatus.ACTIVE);
 
-        User rep1    = createUser("sales_demo1",  "sales1.demo@test.com",  "Demo", "Sales1",  UserRole.SALES_REP, UserStatus.ACTIVE);
-        User rep2    = createUser("sales_demo2",  "sales2.demo@test.com",  "Demo", "Sales2",  UserRole.SALES_REP, UserStatus.ACTIVE);
-        User support = createUser("support_demo", "support.demo@test.com", "Demo", "Support", UserRole.SUPPORT,  UserStatus.INACTIVE);
+        User rep1    = createUser("sales_demo1",  "sales1@company.com",  "Chinthan", "Sales",  UserRole.SALES_REP, UserStatus.ACTIVE);
+        User rep2    = createUser("sales_demo2",  "sales2@company.com",  "Regional", "Rep",  UserRole.SALES_REP, UserStatus.ACTIVE);
+        User support = createUser("support_demo", "support@company.com", "Customer", "Support", UserRole.SUPPORT,  UserStatus.INACTIVE);
 
-        /* wire manager relationships */
         rep1.setManager(manager);
         rep2.setManager(manager);
         support.setManager(manager);
@@ -75,16 +74,16 @@ public class DataInitializer implements CommandLineRunner {
         logger.info("Initializing customers…");
 
         List<Customer> customers = Arrays.asList(
-                createCustomer("Test",    "Customer1", "test.customer1@demo.com", "+1-555-0101", "Demo Corp",
-                        "123 Test St, Demo City",   CustomerStatus.ACTIVE,   new BigDecimal("1500.00")),
-                createCustomer("Demo",    "Client2",   "demo.client2@test.com",    "+1-555-0102", "Test Industries",
-                        "456 Demo Ave, Test Town",  CustomerStatus.ACTIVE,   new BigDecimal("2750.50")),
-                createCustomer("Sample",  "User3",     "sample.user3@demo.com",    "+1-555-0103", "Demo Solutions",
-                        "789 Sample Blvd, Village", CustomerStatus.ACTIVE,   new BigDecimal("890.25")),
-                createCustomer("Trial",   "Account4",  "trial.account4@test.com",  "+1-555-0104", "Test Enterprises",
-                        "321 Trial Rd, Test City",  CustomerStatus.ACTIVE,   new BigDecimal("3200.00")),
-                createCustomer("Example", "Contact5",  "example.contact5@demo.com","+1-555-0105", "Demo Systems",
-                        "654 Example Ln, Heights",  CustomerStatus.INACTIVE, new BigDecimal("0.00"))
+                createCustomer("Rajesh",    "Kumar", "rajesh.kumar@techcorp.in", "+91-9876543210", "TechCorp Solutions",
+                        "A-101, Cyber City, Gurgaon, Haryana 122001",   CustomerStatus.ACTIVE,   new BigDecimal("125000.00")),
+                createCustomer("Priya",    "Sharma",   "priya.sharma@innovate.in",    "+91-9823456789", "InnovateTech Industries",
+                        "Plot 45, Hinjewadi Phase 2, Pune, Maharashtra 411057",  CustomerStatus.ACTIVE,   new BigDecimal("275000.50")),
+                createCustomer("Arjun",  "Patel",     "arjun.patel@digitalsoln.in",    "+91-9765432108", "Digital Solutions Pvt Ltd",
+                        "15th Floor, Brigade Road, Bangalore, Karnataka 560001", CustomerStatus.ACTIVE,   new BigDecimal("89000.25")),
+                createCustomer("Anita",   "Singh",  "anita.singh@enterprise.in",  "+91-9654321098", "Enterprise Systems Ltd",
+                        "Tower B, Sector 18, Noida, Uttar Pradesh 201301",  CustomerStatus.ACTIVE,   new BigDecimal("320000.00")),
+                createCustomer("Vikram", "Reddy",  "vikram.reddy@techsys.in","+91-9543210987", "TechSys Corporation",
+                        "IT Park, OMR Road, Chennai, Tamil Nadu 600096",  CustomerStatus.INACTIVE, new BigDecimal("0.00"))
         );
 
         customerRepository.saveAll(customers);
@@ -100,11 +99,11 @@ public class DataInitializer implements CommandLineRunner {
         List<Customer> customers = customerRepository.findAll();
 
         List<Sale> sales = Arrays.asList(
-                createSale(new BigDecimal("500.00"),  "Demo software license",        SaleStatus.COMPLETED, customers.get(0), rep1),
-                createSale(new BigDecimal("1250.50"), "Test implementation services", SaleStatus.COMPLETED, customers.get(1), rep1),
-                createSale(new BigDecimal("890.25"),  "Sample consultation package",  SaleStatus.COMPLETED, customers.get(2), rep2),
-                createSale(new BigDecimal("2200.00"), "Trial enterprise solution",     SaleStatus.PENDING,   customers.get(3), rep2),
-                createSale(new BigDecimal("750.00"),  "Example support contract",      SaleStatus.CANCELED,  customers.get(1), rep1)
+                createSale(new BigDecimal("50000.00"),  "CRM Software License",        SaleStatus.COMPLETED, customers.get(0), rep1),
+                createSale(new BigDecimal("125000.50"), "ERP Implementation Services", SaleStatus.COMPLETED, customers.get(1), rep1),
+                createSale(new BigDecimal("89000.25"),  "Digital Transformation Package",  SaleStatus.COMPLETED, customers.get(2), rep2),
+                createSale(new BigDecimal("220000.00"), "Enterprise Cloud Solution",     SaleStatus.PENDING,   customers.get(3), rep2),
+                createSale(new BigDecimal("75000.00"),  "Annual Maintenance Contract",      SaleStatus.CANCELED,  customers.get(1), rep1)
         );
 
         saleRepository.saveAll(sales);
@@ -121,11 +120,11 @@ public class DataInitializer implements CommandLineRunner {
         List<Customer> customers = customerRepository.findAll();
 
         List<CustomerInteraction> interactions = Arrays.asList(
-                createInteraction(InteractionType.CALL,          "Initial demo call discussion",      customers.get(0), rep1),
-                createInteraction(InteractionType.EMAIL,         "Follow-up test proposal sent",      customers.get(1), rep1),
-                createInteraction(InteractionType.MEETING,       "Requirements-gathering meeting",    customers.get(2), rep2),
-                createInteraction(InteractionType.SUPPORT_TICKET,"Technical support request",         customers.get(3), support),
-                createInteraction(InteractionType.EMAIL,         "Contract-renewal reminder",         customers.get(1), rep2)
+                createInteraction(InteractionType.CALL,          "Initial product demo and requirement discussion",      customers.get(0), rep1),
+                createInteraction(InteractionType.EMAIL,         "Sent detailed proposal with pricing structure",      customers.get(1), rep1),
+                createInteraction(InteractionType.MEETING,       "Requirements gathering and solution architecture",    customers.get(2), rep2),
+                createInteraction(InteractionType.SUPPORT_TICKET,"Technical support for implementation queries",         customers.get(3), support),
+                createInteraction(InteractionType.EMAIL,         "Contract renewal discussion and terms",         customers.get(1), rep2)
         );
 
         customerInteractionRepository.saveAll(interactions);
