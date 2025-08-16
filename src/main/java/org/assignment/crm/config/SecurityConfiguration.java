@@ -9,6 +9,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -22,35 +23,36 @@ public class SecurityConfiguration {
     private UserDetailsService userDetailsService;
 
     @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring()
+                .requestMatchers(
+                        "/v3/api-docs/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
+                        "/swagger-resources/**",
+                        "/webjars/**"
+                );
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
-
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
-
-                        .requestMatchers("/api/users/**").hasRole("ADMIN")
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-
+                        .requestMatchers("/api/auth/**", "/h2-console/**").permitAll()
+                        .requestMatchers("/api/users/**", "/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/reports/analytics/**").hasAnyRole("ADMIN", "MANAGER")
-
-                        .requestMatchers("/api/customers/**").hasAnyRole("ADMIN", "MANAGER", "SALES_REP")
-                        .requestMatchers("/api/sales/**").hasAnyRole("ADMIN", "MANAGER", "SALES_REP")
+                        .requestMatchers("/api/customers/**", "/api/sales/**").hasAnyRole("ADMIN", "MANAGER", "SALES_REP")
                         .requestMatchers("/api/interactions/**").hasAnyRole("ADMIN", "MANAGER", "SALES_REP", "SUPPORT")
-
                         .requestMatchers("/api/reports/**").hasAnyRole("ADMIN", "MANAGER", "SALES_REP")
-
                         .anyRequest().authenticated()
                 )
-
                 .httpBasic(Customizer.withDefaults())
-
+                .formLogin(form -> form.permitAll())
                 .sessionManagement(session -> session
                         .maximumSessions(1)
                         .maxSessionsPreventsLogin(false)
                 )
-
                 .build();
     }
 

@@ -45,6 +45,17 @@ class SaleServiceTest {
         Sale input = new Sale();
         input.setAmount(new BigDecimal("100.00"));
 
+        Customer customer = new Customer();
+        customer.setId(1L);
+        customer.setTotalPurchaseValue(new BigDecimal("0.00"));
+        input.setCustomer(customer);
+
+        User salesRep = new User();
+        salesRep.setId(1L);
+        input.setSalesRep(salesRep);
+
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(salesRep));
         when(saleRepository.save(any(Sale.class))).thenAnswer(inv -> {
             Sale s = inv.getArgument(0);
             s.setId(1L);
@@ -67,16 +78,23 @@ class SaleServiceTest {
 
     @Test
     void updateSale_updatesAmountAndRelations() {
+        Customer existingCustomer = new Customer();
+        existingCustomer.setId(10L);
+        existingCustomer.setTotalPurchaseValue(new BigDecimal("100.00"));
+
         Sale existing = new Sale();
         existing.setId(3L);
         existing.setAmount(new BigDecimal("50"));
         existing.setStatus(SaleStatus.PENDING);
-
+        existing.setCustomer(existingCustomer);
         when(saleRepository.findById(3L)).thenReturn(Optional.of(existing));
 
-        Customer customer = new Customer();
-        customer.setId(11L);
-        when(customerRepository.findById(11L)).thenReturn(Optional.of(customer));
+        when(customerRepository.findById(10L)).thenReturn(Optional.of(existingCustomer));
+
+        Customer newCustomer = new Customer();
+        newCustomer.setId(11L);
+        newCustomer.setTotalPurchaseValue(new BigDecimal("200.00"));
+        when(customerRepository.findById(11L)).thenReturn(Optional.of(newCustomer));
 
         User rep = new User();
         rep.setId(22L);
@@ -87,10 +105,14 @@ class SaleServiceTest {
         Sale updates = new Sale();
         updates.setAmount(new BigDecimal("150"));
         updates.setStatus(SaleStatus.COMPLETED);
-        Sale saleCustomer = new Sale();
-        Customer cRef = new Customer(); cRef.setId(11L); saleCustomer.setCustomer(cRef);
-        updates.setCustomer(cRef);
-        User uRef = new User(); uRef.setId(22L); updates.setSalesRep(uRef);
+
+        Customer customerRef = new Customer();
+        customerRef.setId(11L);
+        updates.setCustomer(customerRef);
+
+        User userRef = new User();
+        userRef.setId(22L);
+        updates.setSalesRep(userRef);
 
         Sale result = saleService.updateSale(3L, updates);
 
@@ -99,6 +121,7 @@ class SaleServiceTest {
         assertThat(result.getCustomer()).isNotNull();
         assertThat(result.getSalesRep()).isNotNull();
     }
+
 
     @Test
     void getSaleByRepId_whenRepMissing_throws() {
