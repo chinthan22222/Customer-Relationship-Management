@@ -1,6 +1,8 @@
 package org.assignment.crm.service;
 
+import org.assignment.crm.entity.Customer;
 import org.assignment.crm.entity.CustomerInteraction;
+import org.assignment.crm.entity.User;
 import org.assignment.crm.enums.InteractionType;
 import org.assignment.crm.exception.CustomerInteractionNotFound;
 import org.assignment.crm.exception.CustomerNotFound;
@@ -40,7 +42,19 @@ class CustomerInteractionServiceTest {
     @Test
     void addCustomerInteraction_setsDefaultsAndSaves() {
         CustomerInteraction input = new CustomerInteraction();
-        input.setType(null);
+        input.setType(InteractionType.EMAIL);
+
+        Customer mockCustomer = new Customer();
+        mockCustomer.setId(1L);
+        input.setCustomer(mockCustomer);
+
+        User mockUser = new User();
+        mockUser.setId(1L);
+        input.setPerformedBy(mockUser);
+
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(mockCustomer));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
+
         when(interactionRepository.save(any(CustomerInteraction.class))).thenAnswer(inv -> {
             CustomerInteraction i = inv.getArgument(0);
             i.setId(1L);
