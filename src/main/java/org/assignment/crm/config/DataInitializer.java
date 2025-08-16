@@ -45,7 +45,6 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) throws Exception {
         logger.info("Starting data initialization...");
 
-        // Check if data already exists
         if (userRepository.count() > 0) {
             logger.info("Data already exists. Skipping initialization.");
             return;
@@ -136,7 +135,7 @@ public class DataInitializer implements CommandLineRunner {
         User user = new User();
         user.setUserName(username);
         user.setEmail(email);
-        user.setPassword(passwordEncoder.encode("demo123")); // Default password for all test users
+        user.setPassword(passwordEncoder.encode("demo123"));
         user.setFirstname(firstName);
         user.setLastName(lastName);
         user.setRole(role);
@@ -166,7 +165,7 @@ public class DataInitializer implements CommandLineRunner {
         sale.setAmount(amount);
         sale.setDescription(description);
         sale.setStatus(status);
-        sale.setSaleDate(LocalDateTime.now().minusDays((long) (Math.random() * 30))); // Random date within last 30 days
+        sale.setSaleDate(LocalDateTime.now().minusDays((long) (Math.random() * 30)));
         sale.setCustomer(customer);
         sale.setSalesRep(salesRep);
         sale.setCreatedAt(LocalDateTime.now());
@@ -178,7 +177,7 @@ public class DataInitializer implements CommandLineRunner {
         CustomerInteraction interaction = new CustomerInteraction();
         interaction.setType(type);
         interaction.setNotes(notes);
-        interaction.setInteractionDate(LocalDateTime.now().minusDays((long) (Math.random() * 15))); // Random date within last 15 days
+        interaction.setInteractionDate(LocalDateTime.now().minusDays((long) (Math.random() * 15)));
         interaction.setCustomer(customer);
         interaction.setPerformedBy(performedBy);
         interaction.setCreatedTime(LocalDateTime.now());

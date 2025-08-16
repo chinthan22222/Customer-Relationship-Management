@@ -826,3 +826,8 @@ org.assignment.crm.exception.CustomerNotFound: Customer doesn't exist
 2025-08-16T11:59:19.915+05:30  INFO 13429 --- [Customer-Relationship-Management] [http-nio-8080-exec-3] org.assignment.crm.service.UserService   : Successfully found user with ID: 1, username: admin_test
 2025-08-16T11:59:26.878+05:30  INFO 13429 --- [Customer-Relationship-Management] [http-nio-8080-exec-4] org.assignment.crm.service.UserService   : Finding user by ID: 8
 2025-08-16T11:59:26.881+05:30  INFO 13429 --- [Customer-Relationship-Management] [http-nio-8080-exec-4] org.assignment.crm.service.UserService   : No user found with ID: 8
+2025-08-16T12:00:39.669+05:30  INFO 13429 --- [Customer-Relationship-Management] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-08-16T12:00:41.690+05:30  INFO 13429 --- [Customer-Relationship-Management] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-08-16T12:00:41.702+05:30  INFO 13429 --- [Customer-Relationship-Management] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-08-16T12:00:41.705+05:30  INFO 13429 --- [Customer-Relationship-Management] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-08-16T12:00:41.711+05:30  INFO 13429 --- [Customer-Relationship-Management] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
