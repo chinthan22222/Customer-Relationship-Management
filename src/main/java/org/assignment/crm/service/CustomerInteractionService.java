@@ -47,6 +47,15 @@ public class CustomerInteractionService {
                 logger.debug("Set default interaction type to EMAIL");
             }
 
+            Customer customer = this.customerRepository.findById(customerInteraction.getCustomer().getId())
+                            .orElseThrow(() -> new CustomerNotFound("Customer not found exception!"));
+
+            User user = this.userRepository.findById(customerInteraction.getPerformedBy().getId())
+                            .orElseThrow(() -> new UserNotFound("Support Not found With this id"));
+
+            customerInteraction.setCustomer(customer);
+            customerInteraction.setPerformedBy(user);
+
             customerInteraction.setCreatedTime(LocalDateTime.now());
             customerInteraction.setUpdateTime(LocalDateTime.now());
 

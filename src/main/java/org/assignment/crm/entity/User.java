@@ -1,11 +1,15 @@
 package org.assignment.crm.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import org.assignment.crm.enums.UserRole;
 import org.assignment.crm.enums.UserStatus;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "users")
 public class User {
@@ -45,6 +49,7 @@ public class User {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "manager_id")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private User manager;
 
     private LocalDateTime createdAt;
