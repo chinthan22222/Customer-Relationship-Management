@@ -22,6 +22,9 @@ public class SecurityConfiguration {
     @Autowired
     private UserDetailsService userDetailsService;
 
+    @Autowired
+    private CustomAuthenticationSuccessHandler successHandler;
+
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
@@ -39,22 +42,32 @@ public class SecurityConfiguration {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
+                                        .requestMatchers("/login",
+                                                "/login.html",
+                                                "/login?error",
+                                                "/logout-success"
+                                        ).permitAll()
                         .requestMatchers("/api/auth/**", "/h2-console/**").permitAll()
                         .requestMatchers("/api/users/**", "/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/reports/analytics/**").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers("/api/customers/**", "/api/sales/**").hasAnyRole("ADMIN", "MANAGER", "SALES_REP")
                         .requestMatchers("/api/interactions/**").hasAnyRole("ADMIN", "MANAGER", "SALES_REP", "SUPPORT")
                         .requestMatchers("/api/reports/**").hasAnyRole("ADMIN", "MANAGER", "SALES_REP")
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())
-                .formLogin(form -> form.permitAll())
+                .formLogin(form -> form
+                        .successHandler(successHandler)
+                        .permitAll()
+                )
                 .sessionManagement(session -> session
                         .maximumSessions(1)
                         .maxSessionsPreventsLogin(false)
                 )
                 .build();
     }
+
 
     @Bean
     public AuthenticationProvider authenticationProvider() {

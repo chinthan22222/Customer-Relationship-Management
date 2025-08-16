@@ -287,4 +287,9 @@ public class UserService {
         }
     }
 
+    @Transactional
+    public List<User> findByRole(UserRole role){
+        return this.userRepository.findByRole(role);
+    }
+
 }
