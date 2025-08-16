@@ -371,4 +371,9 @@ public class SaleService {
             throw e;
         }
     }
+
+    @Transactional(readOnly = true)
+    public List<Sale> getSalesByRepId(long id){
+        return this.saleRepository.getSalesBySalesRep_Id(id);
+    }
 }

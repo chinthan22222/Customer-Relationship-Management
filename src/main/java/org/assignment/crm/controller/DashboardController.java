@@ -1,5 +1,6 @@
 package org.assignment.crm.controller;
 
+import org.assignment.crm.entity.Sale;
 import org.assignment.crm.entity.User;
 import org.assignment.crm.enums.UserRole;
 import org.assignment.crm.service.CustomerService;
@@ -14,9 +15,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.math.BigDecimal;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/dashboard")
@@ -57,7 +57,7 @@ public class DashboardController {
                 dashboard.putAll(getAdminDashboardData());
                 break;
             case MANAGER:
-                dashboard.putAll(getManagerDashboardData());
+                dashboard.putAll(getManagerDashboardData(user.getId()));
                 break;
             case SALES_REP:
                 dashboard.putAll(getSalesRepDashboardData(user.getId()));
@@ -90,21 +90,54 @@ public class DashboardController {
         return adminData;
     }
 
-    private Map<String, Object> getManagerDashboardData() {
-        Map<String, Object> managerData = new HashMap<>();
+    private Map<String, Object> getManagerDashboardData(long managerId) {
 
-        managerData.put("totalCustomers", customerService.getTotalCount());
-        managerData.put("activeCustomers", customerService.findActiveCustomers().size());
-        managerData.put("totalSales", saleService.getAllSales().size());
-        managerData.put("totalSalesReps", userService.findByRole(UserRole.SALES_REP).size());
-        managerData.put("totalInteractions", customerInteractionService.getTotalInteractionCount());
-        managerData.put("recentInteractions", customerInteractionService.getRecentInteractions(5).size());
+        Map<String, Object> dashboard = new HashMap<>();
 
-        managerData.put("dashboardType", "MANAGER_OVERVIEW");
-        managerData.put("welcomeMessage", "Welcome to the CRM Manager Dashboard! Monitor your team's performance.");
+        dashboard.put("totalCustomers",        customerService.getTotalCount());
+        dashboard.put("activeCustomers",       customerService.findActiveCustomers().size());
+        dashboard.put("totalSales",            saleService.getAllSales().size());
+        dashboard.put("totalSalesReps",        userService.findByRole(UserRole.SALES_REP).size());
+        dashboard.put("totalInteractions",     customerInteractionService.getTotalInteractionCount());
+        dashboard.put("recentInteractions",    customerInteractionService.getRecentInteractions(5).size());
+        dashboard.put("dashboardType",         "MANAGER_OVERVIEW");
+        dashboard.put("welcomeMessage",        "Welcome to the CRM Manager Dashboard! Monitor your team's performance.");
 
-        return managerData;
+        List<User> teamMembers = userService.findByManager(managerId);
+
+        List<Map<String, Object>> teamStats = new ArrayList<>();
+        int     teamSalesCount  = 0;
+        BigDecimal teamSalesVal = BigDecimal.ZERO;
+
+        for (User member : teamMembers) {
+
+            List<Sale> sales = saleService.getSalesByRepId(member.getId());
+
+            int count          = sales.size();
+            BigDecimal amount  = sales.stream()
+                    .map(Sale::getAmount)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            teamSalesCount += count;
+            teamSalesVal   = teamSalesVal.add(amount);
+
+            Map<String, Object> m = new HashMap<>();
+            m.put("id",               member.getId());
+            m.put("name",             member.getFirstname() + " " + member.getLastName());
+            m.put("role",             member.getRole());
+            m.put("totalSales",       count);
+            m.put("totalSalesValue",  amount);
+
+            teamStats.add(m);
+        }
+
+        dashboard.put("teamSales",       teamSalesCount);
+        dashboard.put("teamSalesValue",  teamSalesVal);
+        dashboard.put("teamStats",       teamStats);
+
+        return dashboard;
     }
+
 
     private Map<String, Object> getSalesRepDashboardData(Long userId) {
         Map<String, Object> salesRepData = new HashMap<>();

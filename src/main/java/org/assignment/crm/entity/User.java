@@ -29,6 +29,24 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserStatus status;
 
+    public User(long id, String userName, String email, String password, String firstname, String lastName, UserRole role, UserStatus status, User manager, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.userName = userName;
+        this.email = email;
+        this.password = password;
+        this.firstname = firstname;
+        this.lastName = lastName;
+        this.role = role;
+        this.status = status;
+        this.manager = manager;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "manager_id")
+    private User manager;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -37,15 +55,24 @@ public class User {
         return "User{" +
                 "id=" + id +
                 ", userName='" + userName + '\'' +
-                ", Email='" + email + '\'' +
+                ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", firstname='" + firstname + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", role=" + role +
                 ", status=" + status +
+                ", manager=" + manager +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
                 '}';
+    }
+
+    public User getManager() {
+        return manager;
+    }
+
+    public void setManager(User manager) {
+        this.manager = manager;
     }
 
     public User(long id, String userName, String email, String password, String firstname, String lastName, UserRole role, UserStatus status, LocalDateTime createdAt, LocalDateTime updatedAt) {
@@ -67,18 +94,6 @@ public class User {
 
     public void setStatus(UserStatus status) {
         this.status = status;
-    }
-
-    public User(long id, String userName, String email, String password, String firstname, String lastName, UserRole role, LocalDateTime createdAt, LocalDateTime updatedAt) {
-        this.id = id;
-        this.userName = userName;
-        this.email = email;
-        this.password = password;
-        this.firstname = firstname;
-        this.lastName = lastName;
-        this.role = role;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
     }
 
     public User(){

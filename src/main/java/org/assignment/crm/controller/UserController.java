@@ -68,6 +68,10 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{userId}/manager/{managerId}")
+    public User assignManager(@PathVariable Long userId, @PathVariable Long managerId) {return this.userService.setManager(userId,managerId);}
+
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);

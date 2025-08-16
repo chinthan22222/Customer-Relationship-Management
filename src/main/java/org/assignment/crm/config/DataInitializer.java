@@ -26,24 +26,15 @@ public class DataInitializer implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(DataInitializer.class);
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private CustomerRepository customerRepository;
-
-    @Autowired
-    private SaleRepository saleRepository;
-
-    @Autowired
-    private CustomerInteractionRepository customerInteractionRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    @Autowired private UserRepository              userRepository;
+    @Autowired private CustomerRepository          customerRepository;
+    @Autowired private SaleRepository              saleRepository;
+    @Autowired private CustomerInteractionRepository customerInteractionRepository;
+    @Autowired private PasswordEncoder             passwordEncoder;
 
     @Override
-    public void run(String... args) throws Exception {
-        logger.info("Starting data initialization...");
+    public void run(String... args) {
+        logger.info("Starting data initialization…");
 
         if (userRepository.count() > 0) {
             logger.info("Data already exists. Skipping initialization.");
@@ -59,29 +50,41 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void initializeUsers() {
-        logger.info("Initializing users...");
 
-        List<User> users = Arrays.asList(
-            createUser("admin_test", "admin.test@demo.com", "Test", "Admin", UserRole.ADMIN, UserStatus.ACTIVE),
-            createUser("sales_demo1", "sales1.demo@test.com", "Demo", "Sales1", UserRole.SALES_REP, UserStatus.ACTIVE),
-            createUser("sales_demo2", "sales2.demo@test.com", "Demo", "Sales2", UserRole.SALES_REP, UserStatus.ACTIVE),
-            createUser("manager_test", "manager.test@demo.com", "Test", "Manager", UserRole.MANAGER, UserStatus.ACTIVE),
-            createUser("support_demo", "support.demo@test.com", "Demo", "Support", UserRole.SUPPORT, UserStatus.INACTIVE)
-        );
+        logger.info("Initializing users…");
 
-        userRepository.saveAll(users);
-        logger.info("Successfully created {} users", users.size());
+        User admin   = createUser("admin_test",   "admin.test@demo.com",   "Test", "Admin",   UserRole.ADMIN,   UserStatus.ACTIVE);
+        User manager = createUser("manager_test", "manager.test@demo.com", "Test", "Manager", UserRole.MANAGER, UserStatus.ACTIVE);
+
+        User rep1    = createUser("sales_demo1",  "sales1.demo@test.com",  "Demo", "Sales1",  UserRole.SALES_REP, UserStatus.ACTIVE);
+        User rep2    = createUser("sales_demo2",  "sales2.demo@test.com",  "Demo", "Sales2",  UserRole.SALES_REP, UserStatus.ACTIVE);
+        User support = createUser("support_demo", "support.demo@test.com", "Demo", "Support", UserRole.SUPPORT,  UserStatus.INACTIVE);
+
+        /* wire manager relationships */
+        rep1.setManager(manager);
+        rep2.setManager(manager);
+        support.setManager(manager);
+
+        userRepository.saveAll(Arrays.asList(admin, manager, rep1, rep2, support));
+
+        logger.info("Successfully created 5 users with manager hierarchy.");
     }
 
     private void initializeCustomers() {
-        logger.info("Initializing customers...");
+
+        logger.info("Initializing customers…");
 
         List<Customer> customers = Arrays.asList(
-            createCustomer("Test", "Customer1", "test.customer1@demo.com", "+1-555-0101", "Demo Corp", "123 Test St, Demo City", CustomerStatus.ACTIVE, new BigDecimal("1500.00")),
-            createCustomer("Demo", "Client2", "demo.client2@test.com", "+1-555-0102", "Test Industries", "456 Demo Ave, Test Town", CustomerStatus.ACTIVE, new BigDecimal("2750.50")),
-            createCustomer("Sample", "User3", "sample.user3@demo.com", "+1-555-0103", "Demo Solutions", "789 Sample Blvd, Demo Village", CustomerStatus.ACTIVE, new BigDecimal("890.25")),
-            createCustomer("Trial", "Account4", "trial.account4@test.com", "+1-555-0104", "Test Enterprises", "321 Trial Rd, Test City", CustomerStatus.ACTIVE, new BigDecimal("3200.00")),
-            createCustomer("Example", "Contact5", "example.contact5@demo.com", "+1-555-0105", "Demo Systems", "654 Example Lane, Demo Heights", CustomerStatus.INACTIVE, new BigDecimal("0.00"))
+                createCustomer("Test",    "Customer1", "test.customer1@demo.com", "+1-555-0101", "Demo Corp",
+                        "123 Test St, Demo City",   CustomerStatus.ACTIVE,   new BigDecimal("1500.00")),
+                createCustomer("Demo",    "Client2",   "demo.client2@test.com",    "+1-555-0102", "Test Industries",
+                        "456 Demo Ave, Test Town",  CustomerStatus.ACTIVE,   new BigDecimal("2750.50")),
+                createCustomer("Sample",  "User3",     "sample.user3@demo.com",    "+1-555-0103", "Demo Solutions",
+                        "789 Sample Blvd, Village", CustomerStatus.ACTIVE,   new BigDecimal("890.25")),
+                createCustomer("Trial",   "Account4",  "trial.account4@test.com",  "+1-555-0104", "Test Enterprises",
+                        "321 Trial Rd, Test City",  CustomerStatus.ACTIVE,   new BigDecimal("3200.00")),
+                createCustomer("Example", "Contact5",  "example.contact5@demo.com","+1-555-0105", "Demo Systems",
+                        "654 Example Ln, Heights",  CustomerStatus.INACTIVE, new BigDecimal("0.00"))
         );
 
         customerRepository.saveAll(customers);
@@ -89,20 +92,19 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void initializeSales() {
-        logger.info("Initializing sales...");
 
-        List<User> users = userRepository.findAll();
+        logger.info("Initializing sales…");
+
+        User  rep1 = userRepository.findUserByUserName("sales_demo1").orElseThrow();
+        User  rep2 = userRepository.findUserByUserName("sales_demo2").orElseThrow();
         List<Customer> customers = customerRepository.findAll();
 
-        User salesRep1 = users.stream().filter(u -> u.getUserName().equals("sales_demo1")).findFirst().orElse(null);
-        User salesRep2 = users.stream().filter(u -> u.getUserName().equals("sales_demo2")).findFirst().orElse(null);
-
         List<Sale> sales = Arrays.asList(
-            createSale(new BigDecimal("500.00"), "Demo software license", SaleStatus.COMPLETED, customers.get(0), salesRep1),
-            createSale(new BigDecimal("1250.50"), "Test implementation services", SaleStatus.COMPLETED, customers.get(1), salesRep1),
-            createSale(new BigDecimal("890.25"), "Sample consultation package", SaleStatus.COMPLETED, customers.get(2), salesRep2),
-            createSale(new BigDecimal("2200.00"), "Trial enterprise solution", SaleStatus.PENDING, customers.get(3), salesRep2),
-            createSale(new BigDecimal("750.00"), "Example support contract", SaleStatus.CANCELED, customers.get(1), salesRep1)
+                createSale(new BigDecimal("500.00"),  "Demo software license",        SaleStatus.COMPLETED, customers.get(0), rep1),
+                createSale(new BigDecimal("1250.50"), "Test implementation services", SaleStatus.COMPLETED, customers.get(1), rep1),
+                createSale(new BigDecimal("890.25"),  "Sample consultation package",  SaleStatus.COMPLETED, customers.get(2), rep2),
+                createSale(new BigDecimal("2200.00"), "Trial enterprise solution",     SaleStatus.PENDING,   customers.get(3), rep2),
+                createSale(new BigDecimal("750.00"),  "Example support contract",      SaleStatus.CANCELED,  customers.get(1), rep1)
         );
 
         saleRepository.saveAll(sales);
@@ -110,78 +112,86 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void initializeCustomerInteractions() {
-        logger.info("Initializing customer interactions...");
 
-        List<User> users = userRepository.findAll();
+        logger.info("Initializing customer interactions…");
+
+        User  rep1   = userRepository.findUserByUserName("sales_demo1").orElseThrow();
+        User  rep2   = userRepository.findUserByUserName("sales_demo2").orElseThrow();
+        User  support= userRepository.findUserByUserName("support_demo").orElseThrow();
         List<Customer> customers = customerRepository.findAll();
 
-        User salesRep1 = users.stream().filter(u -> u.getUserName().equals("sales_demo1")).findFirst().orElse(null);
-        User salesRep2 = users.stream().filter(u -> u.getUserName().equals("sales_demo2")).findFirst().orElse(null);
-        User support = users.stream().filter(u -> u.getUserName().equals("support_demo")).findFirst().orElse(null);
-
         List<CustomerInteraction> interactions = Arrays.asList(
-            createInteraction(InteractionType.CALL, "Initial demo call discussion", customers.get(0), salesRep1),
-            createInteraction(InteractionType.EMAIL, "Follow-up test proposal sent", customers.get(1), salesRep1),
-            createInteraction(InteractionType.MEETING, "Sample requirements gathering meeting", customers.get(2), salesRep2),
-            createInteraction(InteractionType.SUPPORT_TICKET, "Trial technical support request", customers.get(3), support),
-            createInteraction(InteractionType.EMAIL, "Example contract renewal reminder", customers.get(1), salesRep2)
+                createInteraction(InteractionType.CALL,          "Initial demo call discussion",      customers.get(0), rep1),
+                createInteraction(InteractionType.EMAIL,         "Follow-up test proposal sent",      customers.get(1), rep1),
+                createInteraction(InteractionType.MEETING,       "Requirements-gathering meeting",    customers.get(2), rep2),
+                createInteraction(InteractionType.SUPPORT_TICKET,"Technical support request",         customers.get(3), support),
+                createInteraction(InteractionType.EMAIL,         "Contract-renewal reminder",         customers.get(1), rep2)
         );
 
         customerInteractionRepository.saveAll(interactions);
         logger.info("Successfully created {} customer interactions", interactions.size());
     }
 
-    private User createUser(String username, String email, String firstName, String lastName, UserRole role, UserStatus status) {
-        User user = new User();
-        user.setUserName(username);
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode("demo123"));
-        user.setFirstname(firstName);
-        user.setLastName(lastName);
-        user.setRole(role);
-        user.setStatus(status);
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
-        return user;
+    private User createUser(String username, String email, String firstName, String lastName,
+                            UserRole role, UserStatus status) {
+
+        User u = new User();
+        u.setUserName(username);
+        u.setEmail(email);
+        u.setPassword(passwordEncoder.encode("demo123"));
+        u.setFirstname(firstName);
+        u.setLastName(lastName);
+        u.setRole(role);
+        u.setStatus(status);
+        u.setCreatedAt(LocalDateTime.now());
+        u.setUpdatedAt(LocalDateTime.now());
+        return u;
     }
 
-    private Customer createCustomer(String firstName, String lastName, String email, String phone, String company, String address, CustomerStatus status, BigDecimal totalPurchaseValue) {
-        Customer customer = new Customer();
-        customer.setFirstName(firstName);
-        customer.setLastName(lastName);
-        customer.setEmail(email);
-        customer.setPhoneNumber(phone);
-        customer.setCompany(company);
-        customer.setAddress(address);
-        customer.setStatus(status);
-        customer.setTotalPurchaseValue(totalPurchaseValue);
-        customer.setCreatedAt(LocalDateTime.now());
-        customer.setUpdatedAt(LocalDateTime.now());
-        return customer;
+    private Customer createCustomer(String firstName, String lastName, String email, String phone,
+                                    String company, String address, CustomerStatus status,
+                                    BigDecimal totalPurchaseValue) {
+
+        Customer c = new Customer();
+        c.setFirstName(firstName);
+        c.setLastName(lastName);
+        c.setEmail(email);
+        c.setPhoneNumber(phone);
+        c.setCompany(company);
+        c.setAddress(address);
+        c.setStatus(status);
+        c.setTotalPurchaseValue(totalPurchaseValue);
+        c.setCreatedAt(LocalDateTime.now());
+        c.setUpdatedAt(LocalDateTime.now());
+        return c;
     }
 
-    private Sale createSale(BigDecimal amount, String description, SaleStatus status, Customer customer, User salesRep) {
-        Sale sale = new Sale();
-        sale.setAmount(amount);
-        sale.setDescription(description);
-        sale.setStatus(status);
-        sale.setSaleDate(LocalDateTime.now().minusDays((long) (Math.random() * 30)));
-        sale.setCustomer(customer);
-        sale.setSalesRep(salesRep);
-        sale.setCreatedAt(LocalDateTime.now());
-        sale.setUpdatedAt(LocalDateTime.now());
-        return sale;
+    private Sale createSale(BigDecimal amount, String description, SaleStatus status,
+                            Customer customer, User salesRep) {
+
+        Sale s = new Sale();
+        s.setAmount(amount);
+        s.setDescription(description);
+        s.setStatus(status);
+        s.setSaleDate(LocalDateTime.now().minusDays((long)(Math.random()*30)));
+        s.setCustomer(customer);
+        s.setSalesRep(salesRep);
+        s.setCreatedAt(LocalDateTime.now());
+        s.setUpdatedAt(LocalDateTime.now());
+        return s;
     }
 
-    private CustomerInteraction createInteraction(InteractionType type, String notes, Customer customer, User performedBy) {
-        CustomerInteraction interaction = new CustomerInteraction();
-        interaction.setType(type);
-        interaction.setNotes(notes);
-        interaction.setInteractionDate(LocalDateTime.now().minusDays((long) (Math.random() * 15)));
-        interaction.setCustomer(customer);
-        interaction.setPerformedBy(performedBy);
-        interaction.setCreatedTime(LocalDateTime.now());
-        interaction.setUpdateTime(LocalDateTime.now());
-        return interaction;
+    private CustomerInteraction createInteraction(InteractionType type, String notes,
+                                                  Customer customer, User performedBy) {
+
+        CustomerInteraction ci = new CustomerInteraction();
+        ci.setType(type);
+        ci.setNotes(notes);
+        ci.setInteractionDate(LocalDateTime.now().minusDays((long)(Math.random()*15)));
+        ci.setCustomer(customer);
+        ci.setPerformedBy(performedBy);
+        ci.setCreatedTime(LocalDateTime.now());
+        ci.setUpdateTime(LocalDateTime.now());
+        return ci;
     }
 }

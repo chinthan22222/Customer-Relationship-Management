@@ -32,6 +32,7 @@ public class UserService {
     @Transactional
     public User createUser(User user) {
         logger.info("Creating new user with username: {}", user.getUserName());
+
         try {
             if (userRepository.findUserByUserName(user.getUserName()).isPresent()) {
                 logger.warn("Attempt to create user with existing username: {}", user.getUserName());
@@ -42,6 +43,16 @@ public class UserService {
             user.setCreatedAt(LocalDateTime.now());
             user.setUpdatedAt(LocalDateTime.now());
             user.setStatus(UserStatus.ACTIVE);
+
+            if (user.getManager() != null) {
+                User manager = userRepository.findById(user.getManager().getId())
+                        .orElseThrow(() -> new UserNotFound("Manager not found"));
+                if (manager.getRole() == UserRole.MANAGER || manager.getRole() == UserRole.ADMIN) {
+                    user.setManager(manager);
+                } else {
+                    throw new IllegalArgumentException("managerId must belong to a MANAGER or ADMIN");
+                }
+            }
 
             if (user.getRole() == null) {
                 user.setRole(UserRole.SALES_REP);
@@ -288,8 +299,38 @@ public class UserService {
     }
 
     @Transactional
+    public User setManager(long userId, long managerId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFound("User not found"));
+
+        User manager = userRepository.findById(managerId)
+                .orElseThrow(() -> new UserNotFound("Manager not found"));
+
+        if (userId == managerId) {
+            throw new IllegalArgumentException("User cannot be their own manager");
+        }
+
+        if (!(manager.getRole() == UserRole.MANAGER || manager.getRole() == UserRole.ADMIN)) {
+            throw new IllegalArgumentException("managerId must belong to a MANAGER or ADMIN");
+        }
+
+        user.setManager(manager);
+        user.setUpdatedAt(LocalDateTime.now());
+
+        return userRepository.save(user);
+    }
+
+
+
+    @Transactional(readOnly = true)
     public List<User> findByRole(UserRole role){
         return this.userRepository.findByRole(role);
+    }
+
+    @Transactional(readOnly = true)
+    public List<User> findByManager(long id){
+        return this.userRepository.findUserByManager_Id(id);
     }
 
 }

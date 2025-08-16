@@ -14,5 +14,7 @@ public interface SaleRepository extends JpaRepository<Sale,Long> {
     List<Sale> findSaleByCustomer_Id(long customerId);
 
     List<Sale> findSaleByStatus(SaleStatus status);
+
+    List<Sale> getSalesBySalesRep_Id(long salesRepId);
 }
 
